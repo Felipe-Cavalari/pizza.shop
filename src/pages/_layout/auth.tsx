@@ -5,7 +5,7 @@ import { ModeToggle } from '@/components/mode-toggle'
 
 export default function AuthLayout() {
   return (
-    <div className="grid min-h-screen grid-cols-2">
+    <div className="grid min-h-screen grid-cols-2 antialiased">
       <div className="fixed right-5 top-5">
         <ModeToggle />
       </div>

@@ -1,8 +1,37 @@
-import { Outlet } from 'react-router-dom'
+import { isAxiosError } from 'axios'
+import { useEffect } from 'react'
+import { Outlet, useNavigate } from 'react-router-dom'
+import { toast } from 'sonner'
 
 import { Header } from '@/components/header'
+import { api } from '@/lib/axios'
 
 export default function AppLayout() {
+  const navigate = useNavigate()
+
+  useEffect(() => {
+    const interceptorId = api.interceptors.response.use(
+      (response) => response,
+      (error) => {
+        if (isAxiosError(error)) {
+          const status = error.response?.status
+          const code = error.response?.data.code
+
+          if (status === 401 && code === 'UNAUTHORIZED') {
+            toast.warning(
+              'Você não está autenticado para acessar essa página!!',
+            )
+            navigate('/sign-in', { replace: true })
+          }
+        }
+      },
+    )
+
+    return () => {
+      api.interceptors.response.eject(interceptorId)
+    }
+  }, [navigate])
+
   return (
     <div className="flex min-h-screen flex-col antialiased">
       <Header />

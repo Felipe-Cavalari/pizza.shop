@@ -1,3 +1,7 @@
+import { useQuery } from '@tanstack/react-query'
+import { subDays } from 'date-fns'
+import { useMemo, useState } from 'react'
+import { DateRange } from 'react-day-picker'
 import {
   CartesianGrid,
   Line,
@@ -9,6 +13,7 @@ import {
 } from 'recharts'
 import colors from 'tailwindcss/colors'
 
+import { getDailyRevenueInPeriod } from '@/api/get-daily-revenue-in-period'
 import {
   Card,
   CardContent,
@@ -16,18 +21,33 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
-
-const data = [
-  { data: '10/12', revenue: 1200 },
-  { data: '11/12', revenue: 800 },
-  { data: '12/12', revenue: 900 },
-  { data: '13/12', revenue: 400 },
-  { data: '14/12', revenue: 2300 },
-  { data: '15/12', revenue: 800 },
-  { data: '16/12', revenue: 640 },
-]
+import { DatePickerWithRange } from '@/components/ui/date-range-picker'
+import { Label } from '@/components/ui/label'
 
 export function RevenueChart() {
+  const [dateRange, setDateRange] = useState<DateRange | undefined>({
+    from: subDays(new Date(), 7),
+    to: new Date(),
+  })
+
+  const { data: dailyRenevueInPeriod } = useQuery({
+    queryKey: ['metrics', 'daily-receipt-in-period', dateRange],
+    queryFn: () =>
+      getDailyRevenueInPeriod({
+        from: dateRange?.from,
+        to: dateRange?.to,
+      }),
+  })
+
+  const charData = useMemo(() => {
+    return dailyRenevueInPeriod?.map((charItem) => {
+      return {
+        date: charItem.date,
+        receipt: charItem.receipt / 100,
+      }
+    })
+  }, [dailyRenevueInPeriod])
+
   return (
     <Card className="col-span-6">
       <CardHeader className="flex-row items-center justify-between">
@@ -37,32 +57,43 @@ export function RevenueChart() {
           </CardTitle>
           <CardDescription>Receita diaria do período</CardDescription>
         </div>
+        <div className="flex items-center gap-3">
+          <Label>Período</Label>
+          <DatePickerWithRange date={dateRange} onDateChange={setDateRange} />
+        </div>
       </CardHeader>
       <CardContent>
-        <ResponsiveContainer width="100%" height={240}>
-          <LineChart style={{ fontSize: 12 }} data={data}>
-            <CartesianGrid className="text-muted" vertical={false} />
-            <XAxis dataKey={'data'} tickLine={false} axisLine={false} dy={16} />
-            <YAxis
-              width={80}
-              axisLine={false}
-              tickLine={false}
-              tickFormatter={(value: number) =>
-                value.toLocaleString('pt-br', {
-                  style: 'currency',
-                  currency: 'BRL',
-                })
-              }
-            />
-            <Line
-              type="linear"
-              strokeWidth={2}
-              dataKey="revenue"
-              stroke={colors.emerald[500]}
-            />
-            <Tooltip contentStyle={{ color: 'black' }} />
-          </LineChart>
-        </ResponsiveContainer>
+        {charData && (
+          <ResponsiveContainer width="100%" height={240}>
+            <LineChart style={{ fontSize: 12 }} data={charData}>
+              <CartesianGrid className="text-muted" vertical={false} />
+              <XAxis
+                dataKey={'data'}
+                tickLine={false}
+                axisLine={false}
+                dy={16}
+              />
+              <YAxis
+                width={80}
+                axisLine={false}
+                tickLine={false}
+                tickFormatter={(value: number) =>
+                  value.toLocaleString('pt-br', {
+                    style: 'currency',
+                    currency: 'BRL',
+                  })
+                }
+              />
+              <Line
+                type="linear"
+                strokeWidth={2}
+                dataKey="receipt"
+                stroke={colors.emerald[500]}
+              />
+              <Tooltip contentStyle={{ color: 'black' }} />
+            </LineChart>
+          </ResponsiveContainer>
+        )}
       </CardContent>
     </Card>
   )

@@ -25,25 +25,41 @@ export function Pagination({
   return (
     <div className="flex items-center justify-between">
       <span className="text-sm text-muted-foreground">
-        Total de {totalCount + 1} item(s)
+        Total de {totalCount} item(s)
       </span>
       <div className="text-sm font-medium">
         Página {pageIndex + 1} de {pages}
       </div>
       <div className="flex items-center gap-2">
-        <Button variant={'outline'} onClick={() => onPageChange(0)} disabled={pageIndex === 0}>
+        <Button
+          variant={'outline'}
+          onClick={() => onPageChange(0)}
+          disabled={pageIndex === 0}
+        >
           <ChevronsLeft className="size-4" />
           <span className="sr-only">Primeira página</span>
         </Button>
-        <Button variant={'outline'} onClick={() => onPageChange(pageIndex - 1)} disabled={pageIndex === 0}>
+        <Button
+          variant={'outline'}
+          onClick={() => onPageChange(pageIndex - 1)}
+          disabled={pageIndex === 0}
+        >
           <ChevronLeft className="size-4" />
           <span className="sr-only">Página anterior</span>
         </Button>
-        <Button variant={'outline'} onClick={() => onPageChange(pageIndex + 1)} disabled={pageIndex === pages - 1}>
+        <Button
+          variant={'outline'}
+          onClick={() => onPageChange(pageIndex + 1)}
+          disabled={pageIndex === pages - 1}
+        >
           <ChevronRight className="size-4" />
           <span className="sr-only">Próxima página</span>
         </Button>
-        <Button variant={'outline'} onClick={() => onPageChange(pages - 1)} disabled={pageIndex === pages - 1}>
+        <Button
+          variant={'outline'}
+          onClick={() => onPageChange(pages - 1)}
+          disabled={pageIndex === pages - 1}
+        >
           <ChevronsRight className="size-4" />
           <span className="sr-only">Última página</span>
         </Button>
